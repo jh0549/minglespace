@@ -11,6 +11,7 @@ const dummyRooms = [
     members: ["member1", "member2"],
     messages: [{ text: "안녕하세요", sender: "member1" }],
     unreadCount: 2,
+    img: "/src/asset/imgs/profile1.png",
   },
   {
     id: 2,
@@ -18,6 +19,7 @@ const dummyRooms = [
     members: ["member2", "member3"],
     messages: [{ text: "반갑습니다!", sender: "member3" }],
     unreadCount: 4,
+    img: "/src/asset/imgs/profile1.png",
   },
   {
     id: 3,
@@ -25,12 +27,13 @@ const dummyRooms = [
     members: ["member3", "member4, member5"],
     messages: [{ text: "집에 가자!", sender: "member4" }],
     unreadCount: 5,
+    img: "/src/asset/imgs/profile1.png",
   },
 ];
 
 const ChatList = ({ pb, me }) => {
   console.log(pb);
-  const [rooms, setRooms] = useState([]); // 채팅방 상태
+  const [rooms, setRooms] = useState([dummyRooms]); // 채팅방 상태
   const [error, setError] = useState(null); //오류 상태
   const [isModalOpen, setIsModalOpen] = useState(false); //모달 열림/닫힘 상태
 
@@ -42,6 +45,14 @@ const ChatList = ({ pb, me }) => {
   // 모달을 닫는 함수
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  // 새로운 채팅방 추가 함수
+  const handleCreateRoom = (newRoom) => {
+    setRooms((prevRooms) => [
+      ...prevRooms,
+      { ...newRoom, id: prevRooms.length + 1 },
+    ]);
   };
 
   useEffect(() => {
@@ -64,10 +75,11 @@ const ChatList = ({ pb, me }) => {
 
     fetchChatRooms();
   }, [pb]);
+
   return (
     <div>
       <div className="chat_list_container">
-        <h1>chatting Room List </h1>
+        <h1>채팅방 목록 </h1>
         <button className="chat_toggle">
           <FiChevronsLeft />
         </button>
@@ -83,7 +95,11 @@ const ChatList = ({ pb, me }) => {
         </button>
 
         {/* 모달을 isModalOpen 상태에 따라 보여줌  */}
-        <CreateChatRoomModal isOpen={isModalOpen} onClose={closeModal} />
+        <CreateChatRoomModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onCreate={handleCreateRoom}
+        />
       </div>
     </div>
   );

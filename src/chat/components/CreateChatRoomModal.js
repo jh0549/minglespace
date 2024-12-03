@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
-const CreateChatRoomModal = ({ isOpen, onClose }) => {
+const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
   // 모달이 열렸을 때 폼에서 입력하는 값을 관리하는 상태
   const [chatRoomName, setChatRoomName] = useState("");
   const [selectedFriends, setSelectedFriends] = useState([]); // 선택된 친구 목록
   const [selectedImage, setSelectedImage] = useState(null); // 선택된 이미지 파일 선택
+
+  const fileInputRef = useRef(null);
 
   // 친구 목록 더미 데이터
   const friendsList = [
@@ -46,9 +48,16 @@ const CreateChatRoomModal = ({ isOpen, onClose }) => {
   //채팅방 생성 버튼 클릭시
   const handleCreate = () => {
     // 채팅방 생성 API 호출이나 데이터 저장 등 처리 가능
-    console.log(` 새 채팅방 이름 : ${chatRoomName}`);
-    console.log(`선택된 친구들 : ${selectedFriends}`);
-    console.log(` 선택된 이미지 : ${selectedImage}`);
+    // console.log(` 새 채팅방 이름 : ${chatRoomName}`);
+    // console.log(`선택된 친구들 : ${selectedFriends}`);
+    // console.log(` 선택된 이미지 : ${selectedImage}`);
+
+    const newChatRoom = {
+      name: chatRoomName,
+      friends: selectedFriends,
+      img: selectedImage,
+    };
+    onCreate(newChatRoom);
     onClose(); // 채팅방 생성 후 모달 닫기
   };
 
@@ -63,17 +72,30 @@ const CreateChatRoomModal = ({ isOpen, onClose }) => {
           {/* 이미지 선택 (기본 동그라미 이미지와 선택된 이미지 변경) */}
           <div className="modal_img">
             <img
+              className="chat_create_Img"
               src={selectedImage || "../../asset/imgs/default-profile.png"}
-              // 이미지가 선택되지 않으면 기본 이미지로 동그라미 표시
               alt="채팅방 이미지"
             />
           </div>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+
+          <button
+            className="select_img_btn"
+            onClick={() => fileInputRef.current.click()} // 버튼 클릭 시 파일 선택창 열기
+          >
+            변경
+          </button>
+
+          <input
+            className="hidden-file-input"
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+          ></input>
 
           {/* 채팅방 이름 입력 */}
           <input
-            id="file_input"
-            type="file"
+            type="text"
             value={chatRoomName}
             onChange={handleInputChange}
             placeholder="채팅방 이름"
@@ -88,6 +110,7 @@ const CreateChatRoomModal = ({ isOpen, onClose }) => {
                   <label>
                     <input
                       type="checkbox"
+                      checked={selectedFriends.includes(friend.id)} // 체크 상태 유지
                       onChange={(e) => handleFriendSelect(e, friend.id)}
                     />
                     {friend.name}
