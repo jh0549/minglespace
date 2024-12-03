@@ -1,0 +1,92 @@
+import React, { useEffect, useState } from "react";
+import ChatListItem from "./ChatListItem";
+import CreateChatRoomModal from "./CreateChatRoomModal";
+import { FiChevronsLeft } from "react-icons/fi";
+
+// 더미 데이터
+const dummyRooms = [
+  {
+    id: 1,
+    name: "채팅방 1",
+    members: ["member1", "member2"],
+    messages: [{ text: "안녕하세요", sender: "member1" }],
+    unreadCount: 2,
+  },
+  {
+    id: 2,
+    name: "채팅방 2",
+    members: ["member2", "member3"],
+    messages: [{ text: "반갑습니다!", sender: "member3" }],
+    unreadCount: 4,
+  },
+  {
+    id: 3,
+    name: "채팅방 3",
+    members: ["member3", "member4, member5"],
+    messages: [{ text: "집에 가자!", sender: "member4" }],
+    unreadCount: 5,
+  },
+];
+
+const ChatList = ({ pb, me }) => {
+  console.log(pb);
+  const [rooms, setRooms] = useState([]); // 채팅방 상태
+  const [error, setError] = useState(null); //오류 상태
+  const [isModalOpen, setIsModalOpen] = useState(false); //모달 열림/닫힘 상태
+
+  //모달을 여는 함수
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // 모달을 닫는 함수
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      try {
+        if (!pb) {
+          console.error("pb 객체가 없다 ");
+          setError("채팅 데이터를 가져올 수 없습니다.");
+          setRooms(dummyRooms); // 더미 데이터 설정
+          return;
+        }
+        const roomsData = await pb.collection("chats").getFullList();
+        setRooms(roomsData);
+      } catch (error) {
+        console.error("Error fetching chat rooms: ", error);
+        setError("채팅방 데이터를 가져오는 데 문제가 발생했습니다.");
+        setRooms(dummyRooms);
+      }
+    };
+
+    fetchChatRooms();
+  }, [pb]);
+  return (
+    <div>
+      <div className="chat_list_container">
+        <h1>chatting Room List </h1>
+        <button className="chat_toggle">
+          <FiChevronsLeft />
+        </button>
+        {rooms.length === 0 ? (
+          <p>채팅방이 없습니다. </p>
+        ) : (
+          rooms.map((room) => (
+            <ChatListItem key={room.id} chat={room} me={me} />
+          ))
+        )}
+        <button className="create_button" onClick={openModal}>
+          +
+        </button>
+
+        {/* 모달을 isModalOpen 상태에 따라 보여줌  */}
+        <CreateChatRoomModal isOpen={isModalOpen} onClose={closeModal} />
+      </div>
+    </div>
+  );
+};
+
+export default ChatList;
